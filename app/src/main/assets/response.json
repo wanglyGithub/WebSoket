@@ -1,0 +1,12 @@
+{
+  "body": [
+    {
+      "actionType": 1,
+      "message": "执行下载"
+    },
+    {
+      "actionType": 2,
+      "message": "行为日志回捞"
+    }
+  ]
+}
