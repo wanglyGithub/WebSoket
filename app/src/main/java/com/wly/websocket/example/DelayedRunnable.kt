@@ -3,7 +3,7 @@ package com.wly.websocket.example
 import okhttp3.WebSocket
 
 /**
- * author: wangliyun
+ * author: wanglyGithub
  * date: 2021-04-17
  * description:
  */

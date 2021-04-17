@@ -1,5 +1,6 @@
 package com.wly.websocket.example
 
+import android.content.Context
 import android.os.Looper
 import android.util.Log
 import okhttp3.*
@@ -7,17 +8,18 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 
 /**
- * author: wangliyun
+ * author: wanglyGithub
  * date: 2021-04-17
  * description:
  */
-class OKHttpWebSocketTest {
+class OKHttpWebSocketTest(val context: Context) {
 
     private val mockWebServer = MockWebServer()
 
     private var mWebSocket: WebSocket? = null
 
     private val mHanlder = android.os.Handler(Looper.getMainLooper())
+
 
     companion object {
         const val WS_PREFIX = "ws://"
@@ -56,12 +58,15 @@ class OKHttpWebSocketTest {
 
                 Log.i("wangly", "onOpen client  response: $response")
 
+                // 通知服务器，服务器收到做出响应
                 sendMessage()
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 super.onMessage(webSocket, text)
                 Log.i("wangly", "onMessage  text = $text")
+
+                // 收到服务器数据解析根据actionType 进行相关业务操作
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -96,6 +101,9 @@ class OKHttpWebSocketTest {
                 super.onMessage(webSocket, text)
 
                 Log.i("wangly", "onOpen server onMessage..... text = $text")
+
+                val response = AssetsUtils.readAssetsInfo(context,"response.json")
+                webSocket.send(response)
 
             }
 
