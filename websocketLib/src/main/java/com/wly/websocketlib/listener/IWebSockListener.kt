@@ -1,5 +1,6 @@
 package com.wly.websocketlib.listener
 
+import com.wly.websocketlib.constant.Constants
 import okhttp3.WebSocket
 
 /**
@@ -9,13 +10,13 @@ import okhttp3.WebSocket
  */
 interface IWebSockListener {
 
-    fun getWebSocket(): WebSocket
+    fun getWebSocket(): WebSocket?
 
     fun startConnect()
     fun closeConnect()
 
 
-    fun setWsConnectStatus(status: Int)
+    fun setWsConnectStatus(status: Int = Constants.StatusCode.NONE_STATUS)
 
     fun getWsConnectStatus():Int
 

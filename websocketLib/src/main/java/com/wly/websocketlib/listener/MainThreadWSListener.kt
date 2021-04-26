@@ -8,13 +8,17 @@ import okhttp3.WebSocket
  * date: 2021-04-18
  * description:
  */
-interface AbsWebSocketListener {
+interface MainThreadWSListener {
 
     fun onOpen(webSocket: WebSocket, response: Response)
 
     fun onClose(webSocket: WebSocket, code: Int, reason: String)
 
 
+    fun onMessage(webSocket: WebSocket, body:String)
+
+
+    fun onFailure(webSocket: WebSocket,throwable: Throwable)
 
 
 

@@ -1,10 +1,10 @@
 package com.wly.websocketlib
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.wly.websocketlib.constant.Constants
 import com.wly.websocketlib.listener.IWebSockListener
+import com.wly.websocketlib.listener.MainThreadWSListener
 import okhttp3.*
 
 /**
@@ -28,25 +28,47 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
 
     private var connectionStatus = Constants.StatusCode.NONE_STATUS
 
+    private var listener: MainThreadWSListener? = null
+
     private val mSocketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             mWebSocket = webSocket
             setWsConnectStatus(Constants.StatusCode.CONNECTED_STATUS)
+            if (isMainThread()) {
+                listener?.onOpen(webSocket, response)
+            } else {
+                mHandler.post { listener?.onOpen(webSocket, response) }
+            }
 
-            
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            super.onMessage(webSocket, text)
+            if (isMainThread()) {
+                listener?.onMessage(webSocket, text)
+            } else {
+                mHandler.post { listener?.onMessage(webSocket, text) }
+            }
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            super.onClosed(webSocket, code, reason)
+            if (isMainThread()) {
+                listener?.onClose(webSocket, code, reason)
+            } else {
+                mHandler.post { listener?.onClose(webSocket, code, reason) }
+            }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            super.onFailure(webSocket, t, response)
+            if (isMainThread()) {
+                listener?.onFailure(webSocket, t)
+            } else {
+                mHandler.post { listener?.onFailure(webSocket, t) }
+            }
         }
+    }
+
+    fun setWebSocketListener(listener: MainThreadWSListener) {
+        this.listener = listener
     }
 
     private fun initSocket() {
@@ -74,8 +96,8 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
     }
 
 
-    override fun getWebSocket(): WebSocket {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getWebSocket(): WebSocket? {
+        return mWebSocket
     }
 
     override fun startConnect() {
@@ -106,11 +128,11 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
 
 
     override fun setWsConnectStatus(status: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        this.connectionStatus = status
     }
 
     override fun getWsConnectStatus(): Int {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return this.connectionStatus
     }
 
 
@@ -120,8 +142,7 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
     }
 
 
-    class Builder(context: Context) {
-        var mContext = context
+    class Builder {
         var okHttpClient: OkHttpClient? = null
 
         var socketUrl = ""
@@ -132,7 +153,7 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
             return this
         }
 
-
+        // 承接在项目之外的 OKHttpClient 自主配置
         fun client(client: OkHttpClient): Builder {
             this.okHttpClient = client
             return this
@@ -144,6 +165,13 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
             return WSLinkManager(this)
         }
 
+    }
+
+    /***
+     * 是否在主线程
+     */
+    private fun isMainThread(): Boolean {
+        return Looper.myLooper() == Looper.getMainLooper()
     }
 
 }
