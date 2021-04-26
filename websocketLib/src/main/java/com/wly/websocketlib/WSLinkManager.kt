@@ -1,10 +1,12 @@
 package com.wly.websocketlib
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.wly.websocketlib.constant.Constants
 import com.wly.websocketlib.listener.IWebSockListener
 import com.wly.websocketlib.listener.MainThreadWSListener
+import com.wly.websocketlib.utils.NetWorkUtils
 import okhttp3.*
 
 /**
@@ -18,6 +20,7 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
     @JvmField
     val TAG = "WSLinkManager"
     private var socketUrl = builder.socketUrl
+    private var mContext = builder.mContext
 
     private val mHandler = Handler(Looper.getMainLooper())
 
@@ -102,12 +105,16 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
 
     override fun startConnect() {
 
-        if (getWsConnectStatus() == Constants.StatusCode.CONNECTED_STATUS) {
+        if (!NetWorkUtils.isConnected(mContext)) {
+            setWsConnectStatus(Constants.StatusCode.DISCONNECTED_STATUS)
             return
-        } else {
-            initSocket()
         }
 
+        if (getWsConnectStatus() == Constants.StatusCode.CONNECTED_STATUS) {
+            return
+        }
+
+        initSocket()
 
     }
 
@@ -122,7 +129,7 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
         mOkHttpClient?.dispatcher?.cancelAll()
 
 
-        setWsConnectStatus(Constants.StatusCode.DISCONNECTED_STATUS)
+        setWsConnectStatus(Constants.StatusCode.NONE_STATUS)
 
     }
 
@@ -142,7 +149,8 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
     }
 
 
-    class Builder {
+    class Builder(context: Context) {
+        var mContext = context
         var okHttpClient: OkHttpClient? = null
 
         var socketUrl = ""

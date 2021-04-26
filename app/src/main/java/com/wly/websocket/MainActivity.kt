@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         val client = OkHttpClient.Builder().build()
 
-        val wsLinkManager = WSLinkManager.Builder()
+        val wsLinkManager = WSLinkManager.Builder(this)
             .socketUrl("")
             .client(client)
             .build()
@@ -49,5 +49,8 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+
+        wsLinkManager.startConnect()
     }
 }
