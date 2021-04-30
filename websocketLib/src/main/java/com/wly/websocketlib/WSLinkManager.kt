@@ -29,6 +29,7 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
 
     private var mWebSocket: WebSocket? = null
 
+    @Volatile
     private var connectionStatus = Constants.StatusCode.NONE_STATUS
 
     private var listener: MainThreadWSListener? = null
@@ -134,10 +135,12 @@ class WSLinkManager(builder: Builder) : IWebSockListener {
     }
 
 
+    @Synchronized
     override fun setWsConnectStatus(status: Int) {
         this.connectionStatus = status
     }
 
+    @Synchronized
     override fun getWsConnectStatus(): Int {
         return this.connectionStatus
     }
